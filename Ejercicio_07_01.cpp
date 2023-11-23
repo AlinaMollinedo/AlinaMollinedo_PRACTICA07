@@ -48,24 +48,29 @@
 
 using namespace std;
 
+// Declaracion de los nombres de los archivos
 const char* fileTeams = "EquiposLPFB.bin";
 const char* fileResults = "ResultadosLPFB.bin";
 
+//Estructura para los datos de un equipo
 struct sTeam{
     char name[50], shirtColor[50], department[30];
     int creationYear;
 };
 
+//Estrucutura para los resultados de los partidos
 struct sResults{
     char homeTeam[50], visitorTeam[50], dateMatch[11];
     int homeTeamGoals, visitorTeamGoals;
 };
 
+//Estrucutra de los resultados de cada equipo
 struct sTotals{
     char name[50];
-    int wins = 0, losses = 0, ties = 0, goalsFavor = 0, goalsAgainst = 0, pts = 0;
+    int played = 0, wins = 0, losses = 0, ties = 0, goalsFavor = 0, goalsAgainst = 0, pts = 0;
 };
 
+//Funciones
 int menu();
 sTeam addTeam();
 sResults addResults();
@@ -74,9 +79,8 @@ void addTeamToFile(sTeam);
 bool verifyResults(char[50], char[50]);
 void addResultsToFile(sResults);
 int countTeams();
-char* listTeams();
-sTotals* fillStructs(sTotals);
-sTotals* shellSort(sTotals*, int);
+void fillStructs(sTotals*);
+void shellSort(sTotals*, int);
 void showReport();
 
 
@@ -85,22 +89,23 @@ int main(){
     int option = 0;
     do{
         option = menu();
+        //Realiza la opcion elegida en el menu
         switch(option){
             case 1:
-                //system("cls");
+                system("cls");
                 addTeamToFile(addTeam());
                 break;
             case 2:
-                //system("cls");
+                system("cls");
                 addResultsToFile(addResults());
                 break;
             case 3:
-                //system("cls");
+                system("cls");
                 showReport();
                 break;
             default:
-                //system("cls");
-                cout << "Se ha salido del sistema." << endl;
+                system("cls");
+                cout << "\n---> Se ha salido del sistema." << endl;
                 option = 0;
                 break;
         }
@@ -110,11 +115,12 @@ int main(){
     return 0;
 }
 
+//Despliega el menu de opciones
 int menu(){
-    // system("cls");
+    system("cls");
     int op;
     cout << "\nMENU DE OPCIONES" << endl;
-    cout << "==========================" << endl;
+    cout << "================" << endl;
     cout << "\n\t1. Ingreso de datos de los equipo de la LPFB." << endl;
     cout << "\t2. Ingreso de los resultados de los partidos." << endl;
     cout << "\t3. Reporte de la tabla de posiciones." << endl;
@@ -124,6 +130,7 @@ int menu(){
     return op;
 }
 
+//Pide los datos de un equipo
 sTeam addTeam(){
     sTeam t;
     cout << "\nINGRESO DE DATOS DE LOS EQUIPOS DE LA LPFB" << endl;
@@ -140,6 +147,7 @@ sTeam addTeam(){
     return t;
 }
 
+//Pide los datos para los resultados de un partido
 sResults addResults(){
     sResults r;
     cout << "\nINGRESO DE LOS RESULTADOS DE LOS PARTIDOS" << endl;
@@ -159,6 +167,7 @@ sResults addResults(){
     return r;
 }
 
+//Verifica que el equipo no haya sido agregado anteriormente
 bool verifyTeam(char name[50]){
     sTeam t;
     ifstream rf;
@@ -166,7 +175,7 @@ bool verifyTeam(char name[50]){
     while(rf.read((char*)&t, sizeof(sTeam))){
         if(strcmp(name, t.name) == 0){
             cout << "\nEL EQUIPO YA HA SIDO INGRESADO." << endl;
-            rf.close();
+            system("pause");
             return false;
         }
     }
@@ -174,15 +183,17 @@ bool verifyTeam(char name[50]){
     return true;
 }
 
+//Agrega el equipo al archivo de equipos
 void addTeamToFile(sTeam t){
     ofstream wf;
-    wf.open(fileTeams, ios::binary | ios::app);
     if(verifyTeam(t.name)){
+        wf.open(fileTeams, ios::binary | ios::app);
         wf.write((char*)&t, sizeof(sTeam));
         wf.close();
     }
 }
 
+//Verifica que los dos equipos de un partido ya hayan sido agregados anteriormente
 bool verifyResults(char name1[50], char name2[50]){
     sTeam t;
     ifstream rf1, rf2;
@@ -200,20 +211,23 @@ bool verifyResults(char name1[50], char name2[50]){
         }
     }
     cout << "\nLOS EQUIPOS NO HAN SIDO INGRESADOS CON ANTERIORIDAD." << endl;
+    system("pause");
     rf1.close();
     rf2.close();
     return false;
 }
 
+//Agrega los resultados al archivo de resultados
 void addResultsToFile(sResults r){
     ofstream wf;
-    wf.open(fileResults, ios::binary | ios::app);
     if(verifyResults(r.homeTeam, r.visitorTeam)){
+        wf.open(fileResults, ios::binary | ios::app);
         wf.write((char*)&r, sizeof(sResults));
         wf.close();
     }
 }
 
+//Cuenta la cantidad de equipos en el archivo de equipos
 int countTeams(){
     ifstream rf;
     sTeam t;
@@ -225,23 +239,27 @@ int countTeams(){
     return counter;
 }
 
-sTotals* fillStructs(sTotals* totals){
+//Llena la estructura de los totales de cada equipo 
+void fillStructs(sTotals* totals){
     int pos = 0;
-    //sTeam t;
+    sTeam t;
     sResults r;
-    char name[50] = "BM";
+
     ifstream rfT, rfR;
-    //rfT.open(fileTeams, ios::binary);
-    //while(rfT.read((char*)&t, sizeof(sTeam))){
-        cout << "owo" << endl;
+    rfT.open(fileTeams, ios::binary);
+
+    while(rfT.read((char*)&t, sizeof(sTeam))){
+        strcpy(totals[pos].name, t.name); //Agrega el nombre del equipo
         rfR.open(fileResults, ios::binary);
-        cout << "uwu" << endl;
+
         while(rfR.read((char*)&r, sizeof(sResults))){
-            cout << "ewe" << endl;
-            if(name == r.homeTeam){
-                cout << ">-<" << endl;
-                totals[pos].goalsFavor = r.homeTeamGoals;
-                totals[pos].goalsAgainst = r.visitorTeamGoals;
+            //Verifica si el equipo jugó el partido
+            if(strcmp(t.name, r.homeTeam) == 0){
+                totals[pos].played++;
+                //Agrega los goles
+                totals[pos].goalsFavor += r.homeTeamGoals;
+                totals[pos].goalsAgainst += r.visitorTeamGoals;
+                //Agrega si ganó, empató o perdió el partido
                 if(r.homeTeamGoals - r.visitorTeamGoals > 0){
                     totals[pos].wins++;
                 }
@@ -255,10 +273,12 @@ sTotals* fillStructs(sTotals* totals){
                 }
             }
             else{
-                if(name == r.visitorTeam){
-                    cout << ">-<" << endl;
-                    totals[pos].goalsFavor = r.visitorTeamGoals;
-                    totals[pos].goalsAgainst = r.homeTeamGoals;
+                if(strcmp(t.name, r.visitorTeam) == 0){
+                    totals[pos].played++;
+                    //Agrega los goles
+                    totals[pos].goalsFavor += r.visitorTeamGoals;
+                    totals[pos].goalsAgainst += r.homeTeamGoals;
+                    //Agrega si ganó, empató o perdió el partido
                     if(r.visitorTeamGoals - r.homeTeamGoals > 0){
                         totals[pos].wins++;
                     }
@@ -273,16 +293,16 @@ sTotals* fillStructs(sTotals* totals){
                 }
             }
         }
+        //Cuenta los puntos del equipo
         totals[pos].pts = 3 * totals[pos].wins + totals[pos].ties;
         rfR.close();
         pos++;
-    //}
-    
-    //rfT.close();
-    return totals;
+    }
+    rfT.close();
 }
 
-sTotals* shellSort(sTotals* totals, int n){
+//Organiza los equipos de acuerdo a su numero de puntos, utilizando shell sort
+void shellSort(sTotals* totals, int n){
     int piv = n / 2;
     while(piv != 1){
         for(int i = 0; i < n; i++){
@@ -304,16 +324,36 @@ sTotals* shellSort(sTotals* totals, int n){
             }
         }
     }
-    return totals;
 }
 
+//Muestra la tabla de posiciones
 void showReport(){
-    int n = countTeams();
-    sTotals* totals = {};
-    cout << "holiwi" << endl;
-    totals = fillStructs(totals);
-    for(int i = 0; i < n; i++){
-        cout << totals[i].name << " " << totals[i].wins << " " << totals[i].ties << " " << totals[i].losses << " " << totals[i].pts << endl;
+
+    ifstream rf1, rf2;
+    rf1.open(fileResults, ios::binary);
+    rf2.open(fileResults, ios::binary);
+    if(rf1.good() && rf2.good()){
+        rf1.close();
+        rf2.close();
+
+        int n = countTeams();
+        sTotals totals[n] = {};
+        fillStructs(totals);
+        shellSort(totals, n);
+
+        cout << "\nTABLA DE POSICIONES" << endl;
+        cout << "===================" << endl;
+        cout << "\n\tClub\t\t\tPJ\tG\tE\tP\tGF\tGC\tDG\tPts" << endl;
+        for(int i = n - 1; i > -1; i--){
+            cout << "\t" << totals[i].name << "\t\t\t" << totals[i].played << "\t" << totals[i].wins << "\t" << totals[i].ties << "\t";
+            cout << totals[i].losses << "\t" << totals[i].goalsFavor << "\t" << totals[i].goalsAgainst << "\t";
+            cout << totals[i].goalsFavor - totals[i].goalsAgainst << "\t" << totals[i].pts << endl;
+        }
+        cout << endl;
+        system("pause");
     }
-    cout << "aaa" << endl;
+    else{
+        cout << "\n---> INFORMACION INSUFICIENTE PARA GENERAR REPORTE." << endl;
+        system("pause");
+    }
 }
